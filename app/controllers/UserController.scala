@@ -1,9 +1,9 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-import models.UserRepository
 import play.api.mvc.{BaseController, ControllerComponents}
 import play.api.libs.json._
+import repositories.UserRepository
 
 import scala.concurrent.ExecutionContext
 
@@ -17,8 +17,8 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
 
   def create = Action.async { implicit request =>
     val name = request.body
-    print(name)
-    repo.create("Vasanth", 29).map {user =>
+
+    repo.create("Phani", 29).map {user =>
       Ok(Json.toJson(user))
     }
   }
