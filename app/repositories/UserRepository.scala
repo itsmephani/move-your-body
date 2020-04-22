@@ -1,7 +1,12 @@
 package repositories
 
+import java.sql.Timestamp
+import java.time.{LocalDateTime, ZoneId}
+import java.util.{Date, UUID}
+
 import javax.inject.{Inject, Singleton}
 import models.User
+import org.mindrot.jbcrypt.BCrypt
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
@@ -19,21 +24,38 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (impli
 
     def name = column[String]("name")
 
+    def email = column[String]("email")
+
     def age = column[Int]("age")
 
-    def * = (id, name, age) <> ((User.apply _).tupled, User.unapply)
+    def weight = column[Int]("weight")
+
+    def password = column[String]("password")
+
+    def apiKey = column[String]("apiKey")
+
+    def createdAt = column[Timestamp]("createdAt")
+
+    def * = (id, name, email, age, weight, password, apiKey, createdAt) <> ((User.apply _).tupled, User.unapply)
   }
 
   val users = TableQuery[UsersTable]
 
-  def create(name: String, age: Int): Future[User] = db.run {
-    (users.map(user => (user.name, user.age))
-      returning users.map(_.id)
-      into ((nameAge, id) => User(id, nameAge._1, nameAge._2))
-      ) += (name, age)
-  }
-
   def list: Future[Seq[User]] = db.run {
     users.result
+  }
+
+  def create(name: String, email: String, age: Int, weight: Int, password: String): Future[User] = db.run {
+    val encryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt())
+    val apiKey = UUID.randomUUID.toString
+
+    (users.map(u => (u.name, u.email, u.age, u.weight, u.password, u.apiKey, u.createdAt))
+      returning users.map(_.id)
+      into ((cols, id) => User(id, cols._1, cols._2, cols._3, cols._4, cols._5, cols._6, cols._7))
+      ) += (name, email, age, weight, encryptedPassword, apiKey, new Timestamp((new Date()).getTime()))
+  }
+
+  def findByEmail(email: String): Future[User] = db.run {
+    users.filter(user => user.email === email).result.head
   }
 }
