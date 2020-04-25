@@ -21,15 +21,15 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
     try {
       val name: String = request.body.asJson.get("name").toString
       val email: String = request.body.asJson.get("email").toString
-      val age: Int = request.body.asJson.get("age").toString.toInt
-      val weight: Int = request.body.asJson.get("weight").toString.toInt
       val password: String = request.body.asJson.get("password").toString
+      val age: Int = request.body.asJson.get("age").as[Int]
+      val weight: Int = request.body.asJson.get("weight").as[Int]
 
       repo.create(name, email, age, weight, password).map { user =>
         Ok(Json.toJson(user))
       }
     } catch {
-      case _ => Future(BadRequest("All fields are not passed"))
+      case _ : Throwable => Future(BadRequest("All fields are not passed"))
     }
   }
 
