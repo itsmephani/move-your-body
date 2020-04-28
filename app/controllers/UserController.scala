@@ -19,9 +19,9 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
 
   def create = Action.async { implicit request =>
     try {
-      val name: String = request.body.asJson.get("name").toString
-      val email: String = request.body.asJson.get("email").toString
-      val password: String = request.body.asJson.get("password").toString
+      val name: String = request.body.asJson.get("name").as[String]
+      val email: String = request.body.asJson.get("email").as[String]
+      val password: String = request.body.asJson.get("password").as[String]
       val age: Int = request.body.asJson.get("age").as[Int]
       val weight: Int = request.body.asJson.get("weight").as[Int]
 
@@ -34,8 +34,8 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
   }
 
   def login = Action.async { implicit request =>
-    val email = request.body.asJson.get("email").toString()
-    val password = request.body.asJson.get("password").toString()
+    val email = request.body.asJson.get("email").as[String]
+    val password = request.body.asJson.get("password").as[String]
 
     repo.findByEmail(email).map( user => {
       if (user.isValidPassword(password)) Ok(Json.toJson(user))

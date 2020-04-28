@@ -8,7 +8,8 @@ create table "users" (
   "email" varchar NOT NULL,
   "password" varchar NOT NULL,
   "apiKey" varchar NOT NULL,
-  "createdAt" timestamp default current_timestamp
+  "createdAt" timestamp default current_timestamp,
+  UNIQUE ("email")
 );
 
 # --- !Downs
