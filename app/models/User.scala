@@ -10,6 +10,7 @@ case class User(id: Long,
                 email: String,
                 age: Int,
                 weight: Int,
+                gender: String,
                 password: String,
                 apiKey: String,
                 createdAt: Timestamp) {

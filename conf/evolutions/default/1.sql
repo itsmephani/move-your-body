@@ -5,6 +5,7 @@ create table "users" (
   "name" varchar not null,
   "age" int not null,
   "weight" int not null,
+  "gender" varchar(10) not null,
   "email" varchar NOT NULL,
   "password" varchar NOT NULL,
   "apiKey" varchar NOT NULL,

@@ -25,10 +25,11 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
       val password: String = request.body.asJson.get("password").as[String]
       val age: Int = request.body.asJson.get("age").as[Int]
       val weight: Int = request.body.asJson.get("weight").as[Int]
+      val gender: String = request.body.asJson.get("weight").as[String]
 
       repo.findByEmail(email).flatMap[Result] {
-        case Some(existingUser: User) => Future(NotAcceptable("User already exists"))
-        case None => repo.create(name, email, age, weight, password).map { user =>
+        case Some(_: User) => Future(NotAcceptable("User already exists"))
+        case None => repo.create(name, email, age, weight, gender, password).map { user =>
                        Ok(Json.toJson(user))
                      }
       }

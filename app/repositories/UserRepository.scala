@@ -30,13 +30,15 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (impli
 
     def weight = column[Int]("weight")
 
+    def gender = column[String]("weight")
+
     def password = column[String]("password")
 
     def apiKey = column[String]("apiKey")
 
     def createdAt = column[Timestamp]("createdAt")
 
-    def * = (id, name, email, age, weight, password, apiKey, createdAt) <> ((User.apply _).tupled, User.unapply)
+    def * = (id, name, email, age, weight, gender, password, apiKey, createdAt) <> ((User.apply _).tupled, User.unapply)
   }
 
   val users = TableQuery[UsersTable]
@@ -45,14 +47,14 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (impli
     users.result
   }
 
-  def create(name: String, email: String, age: Int, weight: Int, password: String): Future[User] = db.run {
+  def create(name: String, email: String, age: Int, weight: Int, gender: String, password: String): Future[User] = db.run {
     val encryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt())
     val apiKey = UUID.randomUUID.toString
 
-    (users.map(u => (u.name, u.email, u.age, u.weight, u.password, u.apiKey, u.createdAt))
+    (users.map(u => (u.name, u.email, u.age, u.weight, u.gender, u.password, u.apiKey, u.createdAt))
       returning users.map(_.id)
-      into ((cols, id) => User(id, cols._1, cols._2, cols._3, cols._4, cols._5, cols._6, cols._7))
-      ) += (name, email, age, weight, encryptedPassword, apiKey, new Timestamp((new Date()).getTime()))
+      into ((cols, id) => User(id, cols._1, cols._2, cols._3, cols._4, cols._5, cols._6, cols._7, cols._8))
+      ) += (name, email, age, weight, gender, encryptedPassword, apiKey, new Timestamp((new Date()).getTime()))
   }
 
   def findByEmail(email: String): Future[Option[User]] = db.run {
