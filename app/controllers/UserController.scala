@@ -44,9 +44,9 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
     repo.findByEmail(email).map({
       case Some(user: User) =>   {
         if (user.isValidPassword(password)) Ok(Json.toJson(user))
-        else NotFound
+        else NotFound("User not found")
       }
-      case None =>  NotFound
+      case None =>  NotFound("User not found")
     })
   }
 }
