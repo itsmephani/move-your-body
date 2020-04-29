@@ -55,7 +55,7 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (impli
       ) += (name, email, age, weight, encryptedPassword, apiKey, new Timestamp((new Date()).getTime()))
   }
 
-  def findByEmail(email: String): Future[User] = db.run {
-    users.filter(user => user.email === email).result.head
+  def findByEmail(email: String): Future[Option[User]] = db.run {
+    users.filter(user => user.email === email).result.headOption
   }
 }

@@ -3,11 +3,12 @@ package controllers
 import javax.inject.{Inject, Singleton}
 import models.User
 import org.mindrot.jbcrypt.BCrypt
-import play.api.mvc.{BaseController, ControllerComponents}
+import play.api.mvc.{BaseController, ControllerComponents, Result}
 import play.api.libs.json._
 import repositories.UserRepository
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class UserController @Inject()(repo: UserRepository, val controllerComponents: ControllerComponents)(implicit ec: ExecutionContext) extends BaseController {
@@ -25,8 +26,11 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
       val age: Int = request.body.asJson.get("age").as[Int]
       val weight: Int = request.body.asJson.get("weight").as[Int]
 
-      repo.create(name, email, age, weight, password).map { user =>
-        Ok(Json.toJson(user))
+      repo.findByEmail(email).flatMap[Result] {
+        case Some(existingUser: User) => Future(NotAcceptable("User already exists"))
+        case None => repo.create(name, email, age, weight, password).map { user =>
+                       Ok(Json.toJson(user))
+                     }
       }
     } catch {
       case _ : Throwable => Future(BadRequest("All fields are not passed"))
@@ -37,9 +41,12 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
     val email = request.body.asJson.get("email").as[String]
     val password = request.body.asJson.get("password").as[String]
 
-    repo.findByEmail(email).map( user => {
-      if (user.isValidPassword(password)) Ok(Json.toJson(user))
-      else NotFound
-    });
+    repo.findByEmail(email).map({
+      case Some(user: User) =>   {
+        if (user.isValidPassword(password)) Ok(Json.toJson(user))
+        else NotFound
+      }
+      case None =>  NotFound
+    })
   }
 }
