@@ -2,13 +2,10 @@ package controllers
 
 import javax.inject.{Inject, Singleton}
 import models.User
-import org.mindrot.jbcrypt.BCrypt
 import play.api.mvc.{BaseController, ControllerComponents, Result}
 import play.api.libs.json._
 import repositories.UserRepository
-
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 @Singleton
 class UserController @Inject()(repo: UserRepository, val controllerComponents: ControllerComponents)(implicit ec: ExecutionContext) extends BaseController {
@@ -25,7 +22,7 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
       val password: String = request.body.asJson.get("password").as[String]
       val age: Int = request.body.asJson.get("age").as[Int]
       val weight: Int = request.body.asJson.get("weight").as[Int]
-      val gender: String = request.body.asJson.get("weight").as[String]
+      val gender: String = request.body.asJson.get("gender").as[String]
 
       repo.findByEmail(email).flatMap[Result] {
         case Some(_: User) => Future(NotAcceptable("User already exists"))

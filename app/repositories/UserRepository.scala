@@ -30,7 +30,7 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (impli
 
     def weight = column[Int]("weight")
 
-    def gender = column[String]("weight")
+    def gender = column[String]("gender")
 
     def password = column[String]("password")
 
@@ -59,5 +59,9 @@ class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (impli
 
   def findByEmail(email: String): Future[Option[User]] = db.run {
     users.filter(user => user.email === email).result.headOption
+  }
+
+  def findByApiKey(apiKey: String): Future[Option[User]] = db.run {
+    users.filter(user => user.apiKey === apiKey).result.headOption
   }
 }
