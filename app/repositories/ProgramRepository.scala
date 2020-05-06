@@ -30,7 +30,7 @@ class ProgramRepository @Inject() (usersRepo: UserRepository, dbConfigProvider: 
     def * = (id, name, description, isPublic, userId) <> ((Program.apply _).tupled, Program.unapply)
   }
 
-  private val programs = TableQuery[ProgramsTable]
+  val programs = TableQuery[ProgramsTable]
 
   def create(name: String, description: String, userId: Long, isPublic: Boolean = false): Future[Program] = db.run {
     (programs.map(program => (program.name, program.description, program.isPublic, program.userId))
