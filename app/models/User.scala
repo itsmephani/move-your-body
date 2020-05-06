@@ -1,6 +1,7 @@
 package models
 
 import java.sql.Timestamp
+
 import formatters.TimestampFormatter
 import org.mindrot.jbcrypt.BCrypt
 import play.api.libs.json._
