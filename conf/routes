@@ -12,6 +12,7 @@ POST    /api/users                      controllers.UserController.create
 POST    /api/login                      controllers.UserController.login
 
 # Programs
+POST /api/programs                      controllers.ProgramController.create
 GET /api/programs/:id                   controllers.ProgramController.get(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path

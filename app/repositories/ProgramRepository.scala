@@ -32,7 +32,7 @@ class ProgramRepository @Inject() (usersRepo: UserRepository, dbConfigProvider: 
 
   private val programs = TableQuery[ProgramsTable]
 
-  def create(name: String, description: String, isPublic: Boolean, userId: Long): Future[Program] = db.run {
+  def create(name: String, description: String, userId: Long, isPublic: Boolean = false): Future[Program] = db.run {
     (programs.map(program => (program.name, program.description, program.isPublic, program.userId))
       returning programs.map(_.id)
       into ((columns, id) => Program(id, columns._1, columns._2, columns._3, columns._4))
@@ -52,5 +52,13 @@ class ProgramRepository @Inject() (usersRepo: UserRepository, dbConfigProvider: 
     query.result.statements.foreach(println)
 
     query.result.head
+  }
+
+  def getUserPrograms(userId: Long) = db.run {
+    val query = for {
+      program <- programs if program.userId === userId
+    } yield program
+
+    query.result
   }
 }
