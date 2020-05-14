@@ -8,13 +8,13 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ProgramRepository @Inject() (usersRepo: UserRepository, dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext) {
-  private val dbConfig = dbConfigProvider.get[JdbcProfile]
+class ProgramRepository @Inject() (val usersRepo: UserRepository, dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext) {
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   import dbConfig._
   import profile.api._
 
-  private class ProgramsTable(tag: Tag) extends Table[Program](tag, "programs") {
+  class ProgramsTable(tag: Tag) extends Table[Program](tag, "programs") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def name = column[String]("name")

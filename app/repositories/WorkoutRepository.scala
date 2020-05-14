@@ -8,13 +8,13 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class WorkoutRepository @Inject() (programsRepo: ProgramRepository, dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext) {
-  private val dbConfig = dbConfigProvider.get[JdbcProfile]
+class WorkoutRepository @Inject() (val programsRepo: ProgramRepository, dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext) {
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   import dbConfig._
   import profile.api._
 
-  private class WorkoutsTable(tag: Tag) extends Table[Workout](tag, "workouts") {
+  class WorkoutsTable(tag: Tag) extends Table[Workout](tag, "workouts") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def name = column[String]("name")
@@ -25,7 +25,7 @@ class WorkoutRepository @Inject() (programsRepo: ProgramRepository, dbConfigProv
 
     def program = foreignKey("programId", programId, programsRepo.programs)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
 
-    def * = (id, name, description, programId) <> ((Workout.apply _).tupled, Program.unapply)
+    def * = (id, name, description, programId) <> ((Workout.apply _).tupled, Workout.unapply)
   }
 
   val workouts = TableQuery[WorkoutsTable]

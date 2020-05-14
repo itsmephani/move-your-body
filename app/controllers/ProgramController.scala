@@ -1,17 +1,29 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsError, JsObject, Json}
 import play.api.mvc.{BaseController, ControllerComponents, Result}
 import repositories.ProgramRepository
 import scala.concurrent.{ExecutionContext, Future}
 import auth.AuthAction
-import models.Program
+import play.api.data.Forms._
+import play.api.data.validation.Constraints._
+import play.api.data.Form
 
 @Singleton
 class ProgramController @Inject()(repo: ProgramRepository,
                                   authAction: AuthAction,
-                                  val controllerComponents: ControllerComponents)(implicit  ec: ExecutionContext) extends BaseController {
+                                  val controllerComponents: ControllerComponents)
+                                 (implicit ec: ExecutionContext)
+  extends BaseController {
+
+  val createProgramConstraints = Form(
+    tuple(
+      "name" -> text.verifying(nonEmpty),
+      "description"  -> text.verifying(nonEmpty),
+      "isPublic" -> default(boolean, false)
+    )
+  )
 
   def get(id: Long) = authAction.async { implicit userRequest =>
     repo.get(id).map(programAndUser => Ok(Json.toJson(programAndUser._1)
@@ -22,16 +34,19 @@ class ProgramController @Inject()(repo: ProgramRepository,
 
   def create() = authAction.async { implicit userRequest =>
     try {
-      val name: String = userRequest.body.asJson.get("name").as[String]
-      val description: String = userRequest.body.asJson.get("description").as[String]
-      val isPublic: Boolean = userRequest.body.asJson.map { json =>
-            (json \ "isPublic").as[Boolean]
-          }.getOrElse {
-              false
-          }
+      val form = createProgramConstraints.bind(userRequest.body.asJson.get)
 
-      repo.create(name, description, userRequest.user.id, isPublic).map { program =>
-        Ok(Json.toJson(program))
+      if (form.hasErrors) {
+        val messages = form.errors.map(error => error.key + " " + error.messages)
+        Future(BadRequest(Json.toJson(messages)))
+      } else {
+        val name: String = form.data("name")
+        val description: String = form.data("description")
+        val isPublic: Boolean = form.value.get._3
+
+        repo.create(name, description, userRequest.user.id, isPublic).map { program =>
+          Ok(Json.toJson(program))
+        }
       }
     } catch {
       case _ : Throwable => Future(BadRequest("All fields are not passed"))
