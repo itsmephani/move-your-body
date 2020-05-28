@@ -17,13 +17,9 @@ class ProgramController @Inject()(repo: ProgramRepository,
                                  (implicit ec: ExecutionContext)
   extends BaseController {
 
-  val createProgramConstraints = Form(
-    tuple(
-      "name" -> text.verifying(nonEmpty),
-      "description"  -> text.verifying(nonEmpty),
-      "isPublic" -> default(boolean, false)
-    )
-  )
+  def index = authAction.async { implicit userRequest =>
+    repo.list.map(programs => Ok(Json.toJson(programs)))
+  }
 
   def get(id: Long) = authAction.async { implicit userRequest =>
     repo.get(id).map(programAndUser => Ok(Json.toJson(programAndUser._1)
@@ -60,5 +56,13 @@ class ProgramController @Inject()(repo: ProgramRepository,
   def getUserPrograms(id: Long) = authAction.async { implicit userRequest =>
     repo.getUserPrograms(id).map(program => Ok(Json.toJson(program)))
   }
+
+  private def createProgramConstraints = Form(
+    tuple(
+      "name" -> text.verifying(nonEmpty),
+      "description"  -> text.verifying(nonEmpty),
+      "isPublic" -> default(boolean, false)
+    )
+  )
 }
 

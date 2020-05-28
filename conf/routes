@@ -12,12 +12,16 @@ POST    /api/users                      controllers.UserController.create
 POST    /api/login                      controllers.UserController.login
 
 # Programs
+GET /api/programs                       controllers.ProgramController.index
 GET /api/programs/:id                   controllers.ProgramController.get(id: Long)
 POST /api/programs                      controllers.ProgramController.create
 
 # Workouts
 GET /api/programs/:programId/workouts   controllers.WorkoutController.get(programId: Long)
 POST /api/programs/:programId/workouts  controllers.WorkoutController.create(programId: Long)
+
+# Enrollments
+POST /api/enrollments                    controllers.EnrollmentController.create
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
