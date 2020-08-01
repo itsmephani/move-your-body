@@ -1,15 +1,12 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.libs.json.{JsError, JsObject, Json}
-import play.api.mvc.{BaseController, ControllerComponents, Result}
+import play.api.libs.json.Json
+import play.api.mvc.{BaseController, ControllerComponents}
 import repositories.{EnrollmentRepository, ProgramRepository}
-
 import scala.concurrent.{ExecutionContext, Future}
 import auth.AuthAction
-import models.Program
 import play.api.data.Forms._
-import play.api.data.validation.Constraints._
 import play.api.data.Form
 
 @Singleton
@@ -35,10 +32,8 @@ class EnrollmentController @Inject()(repo: EnrollmentRepository,
       } else {
         val programId: Int = form.data("programId").toInt
         programRepo.get(programId).flatMap {
-          case (_, _) =>
-            repo.create(userRequest.user.id, programId).map { enrollment =>
-              Ok(Json.toJson(enrollment))
-            }
+          case (_, _) => repo.create(userRequest.user.id, programId)
+              .map { enrollment => Ok(Json.toJson(enrollment)) }
           case _ => Future(BadRequest("Program not found"))
         }
       }

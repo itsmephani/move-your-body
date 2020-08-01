@@ -1,7 +1,6 @@
 package models
 
 import java.sql.Timestamp
-
 import formatters.TimestampFormatter
 import play.api.libs.json.Json
 

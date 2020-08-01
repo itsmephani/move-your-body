@@ -1,7 +1,6 @@
 package repositories
 
 import java.sql.Timestamp
-import java.time.{LocalDateTime, ZoneId}
 import java.util.{Date, UUID}
 
 import javax.inject.{Inject, Singleton}
@@ -9,39 +8,14 @@ import models.User
 import org.mindrot.jbcrypt.BCrypt
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-
 import scala.concurrent.{ExecutionContext, Future}
+import tables.Tables.users
 
 @Singleton
 class UserRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
-
   import dbConfig._
   import profile.api._
-
-  class UsersTable(tag: Tag) extends Table[User](tag, "users") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def name = column[String]("name")
-
-    def email = column[String]("email")
-
-    def age = column[Int]("age")
-
-    def weight = column[Int]("weight")
-
-    def gender = column[String]("gender")
-
-    def password = column[String]("password")
-
-    def apiKey = column[String]("apiKey")
-
-    def createdAt = column[Timestamp]("createdAt")
-
-    def * = (id, name, email, age, weight, gender, password, apiKey, createdAt) <> ((User.apply _).tupled, User.unapply)
-  }
-
-  val users = TableQuery[UsersTable]
 
   def list: Future[Seq[User]] = db.run {
     users.result

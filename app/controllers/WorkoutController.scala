@@ -3,7 +3,7 @@ package controllers
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{BaseController, ControllerComponents, Result}
-import repositories.{WorkoutRepository}
+import repositories.WorkoutRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 import auth.AuthAction
@@ -14,11 +14,14 @@ class WorkoutController @Inject()(repo: WorkoutRepository,
                                   val controllerComponents: ControllerComponents)(implicit  ec: ExecutionContext) extends BaseController {
 
   def get(programId: Long) = authAction.async { implicit userRequest =>
-    repo.getProgramWorkouts(programId).map(workoutProgramAndUser => Ok(Json.toJson(workoutProgramAndUser._1)
-      .as[JsObject]
-      .++(Json.obj("program" -> workoutProgramAndUser._2))
-      .++(Json.obj("user" -> workoutProgramAndUser._3)))
-    )
+    repo.getProgramWorkouts(programId).map {
+      case Some(workoutProgramAndUser) =>
+        Ok(Json.toJson(workoutProgramAndUser._1)
+          .as[JsObject]
+          .++(Json.obj("program" -> workoutProgramAndUser._2))
+          .++(Json.obj("user" -> workoutProgramAndUser._3)))
+      case _ => NotFound
+    }
   }
 
   def create(programId: Long) = authAction.async { implicit userRequest =>

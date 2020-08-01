@@ -4,33 +4,15 @@ import javax.inject.{Inject, Singleton}
 import models.{Program, User}
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
-
+import tables.Tables.programs
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ProgramRepository @Inject() (val usersRepo: UserRepository, dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext) {
+class ProgramRepository @Inject() (dbConfigProvider: DatabaseConfigProvider) (implicit ec: ExecutionContext) {
   val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   import dbConfig._
   import profile.api._
-
-  class ProgramsTable(tag: Tag) extends Table[Program](tag, "programs") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def name = column[String]("name")
-
-    def description = column[String]("description")
-
-    def isPublic = column[Boolean]("isPublic")
-
-    def userId = column[Long]("userId")
-
-    def user = foreignKey("userId", userId, usersRepo.users)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
-
-    def * = (id, name, description, isPublic, userId) <> ((Program.apply _).tupled, Program.unapply)
-  }
-
-  val programs = TableQuery[ProgramsTable]
 
   def create(name: String, description: String, userId: Long, isPublic: Boolean = false): Future[Program] = db.run {
     (programs.map(program => (program.name, program.description, program.isPublic, program.userId))
@@ -62,3 +44,4 @@ class ProgramRepository @Inject() (val usersRepo: UserRepository, dbConfigProvid
     query.result
   }
 }
+

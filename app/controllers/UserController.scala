@@ -35,6 +35,26 @@ class UserController @Inject()(repo: UserRepository, val controllerComponents: C
     }
   }
 
+  def update = Action.async { implicit request =>
+    try {
+      val name: String = request.body.asJson.get("name").as[String]
+      val email: String = request.body.asJson.get("email").as[String]
+
+      val res = for {
+        u <- repo.findByEmail(email)
+        user = u.get
+        //updatedUser <- repo.insertOrUpdate(user.id, name, user.email, user.age, user.weight, user.gender, user.password)
+      } yield user
+
+      res.map {
+        case _: User => Ok("Updated successfully")
+        case _ => BadRequest("All fields are not passed")
+      }
+    } catch {
+      case _ : Throwable => Future(BadRequest("All fields are not passed"))
+    }
+  }
+
   def login = Action.async { implicit request =>
     val email = request.body.asJson.get("email").as[String]
     val password = request.body.asJson.get("password").as[String]
