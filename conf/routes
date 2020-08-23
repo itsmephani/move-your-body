@@ -5,6 +5,7 @@
 
 # An example controller showing a sample home page
 GET     /                               controllers.HomeController.index
+GET     /api/info                       controllers.HomeController.info
 
 # Users
 GET     /api/users                      controllers.UserController.index

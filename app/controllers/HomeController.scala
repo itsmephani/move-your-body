@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject._
 import play.api._
+import play.api.libs.json.Json
 import play.api.mvc._
 
 /**
@@ -20,5 +21,10 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
    */
   def index() = Action { implicit request: Request[AnyContent] =>
     Ok("Play")
+  }
+
+  def info = Action { implicit request =>
+    val res = Map("remoteAddress" -> request.connection.remoteAddressString, "host" -> request.host)
+    Ok(Json.toJson(res))
   }
 }
